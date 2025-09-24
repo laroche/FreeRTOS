@@ -88,6 +88,7 @@ static void prvSuspendedTaskTimerTestCallback( TimerHandle_t xExpiredTimer );
 /*-----------------------------------------------------------*/
 
 /* Used to latch errors during the test's execution. */
+uint32_t xErrorInfo = 0UL;
 static BaseType_t xErrorStatus = pdPASS;
 
 /* Used to ensure the task has not stalled. */
@@ -145,6 +146,7 @@ static void prvSingleTaskTests( void )
     /* Should have blocked for the entire block time. */
     if( ( xTaskGetTickCount() - xTimeOnEntering ) < xTicksToWait )
     {
+	xErrorInfo = 1UL;
         xErrorStatus = pdFAIL;
     }
 
@@ -176,6 +178,7 @@ static void prvSingleTaskTests( void )
 
     if( ( xTaskGetTickCount() - xTimeOnEntering ) >= xTicksToWait )
     {
+	xErrorInfo = 2UL;
         xErrorStatus = pdFAIL;
     }
 
@@ -689,6 +692,7 @@ BaseType_t xAreTaskNotificationTasksStillRunning( void )
      * actually running. */
     if( ulLastNotifyCycleCount == ulNotifyCycleCount )
     {
+	xErrorInfo = 3UL;
         xErrorStatus = pdFAIL;
     }
     else
@@ -702,6 +706,7 @@ BaseType_t xAreTaskNotificationTasksStillRunning( void )
     {
         if( ( ulTimerNotificationsSent - ulTimerNotificationsReceived ) > ulMaxSendReceiveDeviation )
         {
+	    xErrorInfo = 4UL;
             xErrorStatus = pdFAIL;
         }
     }

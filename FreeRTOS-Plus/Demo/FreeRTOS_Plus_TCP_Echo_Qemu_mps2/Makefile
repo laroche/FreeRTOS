@@ -60,11 +60,13 @@ CFLAGS += -mthumb -mcpu=cortex-m3
 ifeq ($(DEBUG), 1)
     CFLAGS += -g3 -Og -ffunction-sections -fdata-sections
 else
-    CFLAGS += -Os -ffunction-sections -fdata-sections
+    CFLAGS += -g3 -Os -ffunction-sections -fdata-sections
 endif
-#CFLAGS += -flto
+CFLAGS += -flto
 CFLAGS += -Wall -Wextra -Wshadow
+CFLAGS += -Wconversion -Wwrite-strings -Wold-style-definition -Wredundant-decls -Wstrict-prototypes
 #CFLAGS += -Wpedantic -fanalyzer
+#CFLAGS += -Wmissing-prototypes
 CFLAGS += -MMD
 CFLAGS += $(INCLUDE_DIRS)
 
@@ -72,10 +74,9 @@ LDFLAGS = -T mps2_m3.ld
 LDFLAGS += -Xlinker -Map=${BUILD_DIR}/output.map
 LDFLAGS += -Xlinker --gc-sections
 #LDFLAGS += -Xlinker --print-gc-sections
-ifeq ($(PICOLIBC), 1)
-    LDFLAGS += -nostartfiles
-else
-    LDFLAGS += -nostartfiles -specs=nano.specs -specs=nosys.specs -specs=rdimon.specs
+LDFLAGS += -nostartfiles
+ifneq ($(PICOLIBC), 1)
+    LDFLAGS += -specs=nano.specs -specs=nosys.specs -specs=rdimon.specs
 endif
 
 OBJ_FILES := $(SOURCE_FILES:%.c=$(BUILD_DIR)/%.o)
