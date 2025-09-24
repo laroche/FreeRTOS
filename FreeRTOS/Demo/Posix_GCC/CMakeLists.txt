@@ -4,7 +4,26 @@ project( posix_demo )
 
 add_compile_options( -D_WINDOWS_ )
 
+#add_compile_options( -std=gnu90 )
+
 add_compile_options( -Wall -Wextra -Wpedantic )
+
+add_compile_options( -Wwrite-strings )
+
+#add_compile_options( -Weverything -Wno-padded -Wno-missing-noreturn )
+#add_compile_options( -Wno-unsafe-buffer-usage )
+
+#add_compile_options( -Wparentheses -Wsequence-point -Wpointer-arith -Wunreachable-code -Wuninitialized -Wlogical-not-parentheses -Wlogical-op )
+
+#add_compile_options( -Wshadow )
+
+#add_compile_options( -Wconversion )
+
+#add_compile_options( -Wold-style-definition -Wredundant-decls -Wmissing-prototypes )
+
+#add_compile_options( -fanalyzer )
+
+#add_compile_options( -flto )
 
 if( TRACE_ON_ENTER )
     add_compile_options( -DTRACE_ON_ENTER=1 )
@@ -35,8 +54,8 @@ else()
     set( CMAKE_BUILD_TYPE "debug" )
 endif()
 
-set(CMAKE_C_FLAGS_RELEASE "-O3")
-set(CMAKE_C_FLAGS_DEBUG "-O0 -g3")
+set(CMAKE_C_FLAGS_RELEASE "-g3 -O3 -DNDEBUG")
+set(CMAKE_C_FLAGS_DEBUG "-O3 -g3")
 
 if( SANITIZE_ADDRESS )
     add_compile_options( -fsanitize=address -fsanitize=alignment )

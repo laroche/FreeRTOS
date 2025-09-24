@@ -174,6 +174,7 @@ static const char * pcDataSentFromInterrupt = "0123456789";
 static const char * pc55ByteString = "One two three four five six seven eight nine ten eleven";
 static const char * pc54ByteString = "01234567891abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ";
 
+uint32_t xErrorInfo2 = 0UL;
 /* Used to log the status of the tests contained within this file for reporting
  * to a monitoring task ('check' task). */
 static BaseType_t xErrorStatus = pdPASS;
@@ -221,6 +222,7 @@ static void prvCheckExpectedState( BaseType_t xState )
 
     if( xState == pdFAIL )
     {
+	xErrorInfo2 = 1UL;
         xErrorStatus = pdFAIL;
     }
 }
@@ -1198,6 +1200,7 @@ BaseType_t xAreStreamBufferTasksStillRunning( void )
     {
         if( ulLastEchoLoopCounters[ x ] == ulEchoLoopCounters[ x ] )
         {
+	    xErrorInfo2 = 2UL;
             xErrorStatus = pdFAIL;
         }
         else
@@ -1208,6 +1211,7 @@ BaseType_t xAreStreamBufferTasksStillRunning( void )
 
     if( ulNonBlockingRxCounter == ulLastNonBlockingRxCounter )
     {
+	xErrorInfo2 = 3UL;
         xErrorStatus = pdFAIL;
     }
     else
@@ -1217,6 +1221,7 @@ BaseType_t xAreStreamBufferTasksStillRunning( void )
 
     if( ulLastInterruptTriggerCounter == ulInterruptTriggerCounter )
     {
+	xErrorInfo2 = 4UL;
         xErrorStatus = pdFAIL;
     }
     else
@@ -1232,6 +1237,7 @@ BaseType_t xAreStreamBufferTasksStillRunning( void )
         {
             if( ulLastSenderLoopCounters[ x ] == ulSenderLoopCounters[ x ] )
             {
+		xErrorInfo2 = 5UL;
                 xErrorStatus = pdFAIL;
             }
             else
