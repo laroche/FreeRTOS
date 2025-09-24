@@ -86,6 +86,7 @@
 #ifdef USER_DEMO
     #define     mainSELECTED_APPLICATION    USER_DEMO
 #else /* Default Setting */
+    /* #define    mainSELECTED_APPLICATION     BLINKY_DEMO */
     #define    mainSELECTED_APPLICATION     FULL_DEMO
 #endif
 

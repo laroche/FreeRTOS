@@ -44,10 +44,13 @@ CFLAGS                +=    -mthumb -mcpu=cortex-m3
 ifeq ($(DEBUG), 1)
     CFLAGS            +=     -g3 -Og -ffunction-sections -fdata-sections -save-temps=obj
 else
-    CFLAGS            +=     -Os -ffunction-sections -fdata-sections
+    CFLAGS            +=     -g3 -Os -ffunction-sections -fdata-sections
 endif
-#CFLAGS                +=    -flto
+CFLAGS                +=    -flto
 CFLAGS                +=    -Wall -Wextra -Wshadow -Wno-unused-parameter
+CFLAGS                +=    -Wconversion -Wwrite-strings -Wold-style-definition -Wstrict-prototypes
+#CFLAGS                +=    -Wpedantic -fanalyzer
+#CFLAGS                +=    -Wmissing-prototypes -Wredundant-decls
 CFLAGS                +=    $(INCLUDE_DIRS)
 
 LDFLAGS                =    -T ./scripts/mps2_m3.ld

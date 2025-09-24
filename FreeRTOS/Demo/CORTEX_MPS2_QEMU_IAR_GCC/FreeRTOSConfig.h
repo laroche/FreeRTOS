@@ -51,7 +51,7 @@
 #define configMAX_TASK_NAME_LEN                  ( 12 )
 
 /* TODO TraceRecorder (Step 4): Enable configUSE_TRACE_FACILITY in FreeRTOSConfig.h. */
-#define configUSE_TRACE_FACILITY                 1
+#define configUSE_TRACE_FACILITY                 0
 
 #define configUSE_16_BIT_TICKS                   0
 #define configIDLE_SHOULD_YIELD                  0

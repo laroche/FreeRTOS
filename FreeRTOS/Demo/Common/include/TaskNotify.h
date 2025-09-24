@@ -27,6 +27,8 @@
 #ifndef TASK_NOTIFY_H
 #define TASK_NOTIFY_H
 
+extern uint32_t xErrorInfo;
+
 void vStartTaskNotifyTask( void );
 BaseType_t xAreTaskNotificationTasksStillRunning( void );
 void xNotifyTaskFromISR( void );

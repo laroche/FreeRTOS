@@ -27,6 +27,8 @@
 #ifndef STREAM_BUFFER_TEST_H
 #define STREAM_BUFFER_TEST_H
 
+extern uint32_t xErrorInfo2;
+
 void vStartStreamBufferTasks( void );
 BaseType_t xAreStreamBufferTasksStillRunning( void );
 void vPeriodicStreamBufferProcessing( void );

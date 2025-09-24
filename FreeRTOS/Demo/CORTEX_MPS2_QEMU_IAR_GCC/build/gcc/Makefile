@@ -5,17 +5,27 @@ IMAGE := $(OUTPUT_DIR)/RTOSDemo.out
 FREERTOS_ROOT = ./../../../..
 
 CC = arm-none-eabi-gcc
+#CC = clang-19 --target=arm-linux-gnueabihf -march=armv7-a
+#CC = clang-19 --target=arm-linux-eabi -march=armv7-a
 LD = arm-none-eabi-gcc
+#LD = clang-19 --target=arm-linux-gnueabi -march=armv7-a -mcpu=cortex-m3
+#LD = clang-19 --target=arm-none-eabi -march=armv7-a
+#LD = arm-none-eabi-ld
 SIZE = arm-none-eabi-size
 MAKE = make
 
 ifeq ($(PICOLIBC), 1)
     CFLAGS += --specs=picolibc.specs -DPICOLIBC_INTEGER_PRINTF_SCANF
 endif
-CFLAGS += -mthumb -mcpu=cortex-m3 -ffreestanding
+CFLAGS += -mthumb -mcpu=cortex-m3
 CFLAGS += -g3 -Os -ffunction-sections -fdata-sections
-#CFLAGS += -flto
+CFLAGS += -flto
 CFLAGS += -Wall -Wextra -Wshadow -Wno-unused-value
+CFLAGS += -Wwrite-strings -Wold-style-definition -Wredundant-decls
+#CFLAGS += -std=c99
+#CFLAGS += -Wpedantic -fanalyzer
+#CFLAGS += -Wconversion
+#CFLAGS += -Wmissing-prototypes
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
 CFLAGS += $(INCLUDE_DIRS)
 
