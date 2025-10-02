@@ -1,0 +1,15 @@
+diff --git a/source/portable/NetworkInterface/MPS2_AN385/ether_lan9118/smsc9220_eth_drv.c b/source/portable/NetworkInterface/MPS2_AN385/ether_lan9118/smsc9220_eth_drv.c
+index 9562e3f5..e5636800 100644
+--- a/source/portable/NetworkInterface/MPS2_AN385/ether_lan9118/smsc9220_eth_drv.c
++++ b/source/portable/NetworkInterface/MPS2_AN385/ether_lan9118/smsc9220_eth_drv.c
+@@ -1221,10 +1221,6 @@ uint32_t smsc9220_peek_next_packet_size( const struct
+                                      RX_FIFO_STATUS_PKT_LENGTH_MASK,
+                                      RX_FIFO_STATUS_PKT_LENGTH_POS );
+     }
+-    else
+-    {
+-        rx_status_from_peek = ( uint32_t ) -1;
+-    }
+ 
+     return packet_size;
+ }

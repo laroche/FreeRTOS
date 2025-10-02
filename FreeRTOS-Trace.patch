@@ -1,0 +1,28 @@
+diff --git a/include/trcRecorder.h b/include/trcRecorder.h
+index a8c66cc..3cf79b8 100644
+--- a/include/trcRecorder.h
++++ b/include/trcRecorder.h
+@@ -32,7 +32,7 @@ extern "C" {
+ #include <trcConfig.h>
+ 
+ #ifndef TRC_CFG_ENTRY_SLOTS
+-#error TRC_CFG_ENTRY_SLOTS not defined. Please ensure you are using updated config files.
++#define TRC_CFG_ENTRY_SLOTS 50
+ #endif
+ 
+ #include <trcKernelPortConfig.h>
+diff --git a/include/trcTaskMonitor.h b/include/trcTaskMonitor.h
+index f922f66..1b069e0 100644
+--- a/include/trcTaskMonitor.h
++++ b/include/trcTaskMonitor.h
+@@ -23,6 +23,10 @@
+ #define TRC_KERNEL_PORT_SUPPORTS_TLS 0
+ #endif
+ 
++#ifndef TRC_ENTRY_TABLE_SLOT_SYMBOL_SIZE
++#define TRC_ENTRY_TABLE_SLOT_SYMBOL_SIZE 50
++#endif
++
+ typedef struct TraceTaskMonitorCallbackData
+ {
+ 	void* pvTaskAddress;

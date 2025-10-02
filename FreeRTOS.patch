@@ -1,0 +1,333 @@
+diff --git a/FreeRTOS-Plus/Demo/FreeRTOS_Plus_TCP_Echo_Qemu_mps2/Makefile b/FreeRTOS-Plus/Demo/FreeRTOS_Plus_TCP_Echo_Qemu_mps2/Makefile
+index 93d73435e..439de0537 100644
+--- a/FreeRTOS-Plus/Demo/FreeRTOS_Plus_TCP_Echo_Qemu_mps2/Makefile
++++ b/FreeRTOS-Plus/Demo/FreeRTOS_Plus_TCP_Echo_Qemu_mps2/Makefile
+@@ -60,11 +60,14 @@ CFLAGS += -mthumb -mcpu=cortex-m3
+ ifeq ($(DEBUG), 1)
+     CFLAGS += -g3 -Og -ffunction-sections -fdata-sections
+ else
+-    CFLAGS += -Os -ffunction-sections -fdata-sections
++    CFLAGS += -g3 -Os -ffunction-sections -fdata-sections
+ endif
+-#CFLAGS += -flto
++CFLAGS += -flto
+ CFLAGS += -Wall -Wextra -Wshadow
++CFLAGS += -Wconversion -Wwrite-strings -Wold-style-definition -Wredundant-decls -Wstrict-prototypes
++#CFLAGS += -Wc++-compat
+ #CFLAGS += -Wpedantic -fanalyzer
++#CFLAGS += -Wmissing-prototypes
+ CFLAGS += -MMD
+ CFLAGS += $(INCLUDE_DIRS)
+ 
+@@ -72,10 +75,9 @@ LDFLAGS = -T mps2_m3.ld
+ LDFLAGS += -Xlinker -Map=${BUILD_DIR}/output.map
+ LDFLAGS += -Xlinker --gc-sections
+ #LDFLAGS += -Xlinker --print-gc-sections
+-ifeq ($(PICOLIBC), 1)
+-    LDFLAGS += -nostartfiles
+-else
+-    LDFLAGS += -nostartfiles -specs=nano.specs -specs=nosys.specs -specs=rdimon.specs
++LDFLAGS += -nostartfiles
++ifneq ($(PICOLIBC), 1)
++    LDFLAGS += -specs=nano.specs -specs=nosys.specs -specs=rdimon.specs
+ endif
+ 
+ OBJ_FILES := $(SOURCE_FILES:%.c=$(BUILD_DIR)/%.o)
+diff --git a/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/FreeRTOSConfig.h b/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/FreeRTOSConfig.h
+index b6c0130be..6c8c09454 100644
+--- a/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/FreeRTOSConfig.h
++++ b/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/FreeRTOSConfig.h
+@@ -51,7 +51,7 @@
+ #define configMAX_TASK_NAME_LEN                  ( 12 )
+ 
+ /* TODO TraceRecorder (Step 4): Enable configUSE_TRACE_FACILITY in FreeRTOSConfig.h. */
+-#define configUSE_TRACE_FACILITY                 1
++#define configUSE_TRACE_FACILITY                 0
+ 
+ #define configUSE_16_BIT_TICKS                   0
+ #define configIDLE_SHOULD_YIELD                  0
+diff --git a/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/build/gcc/Makefile b/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/build/gcc/Makefile
+index b238f8ffa..f43572854 100644
+--- a/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/build/gcc/Makefile
++++ b/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/build/gcc/Makefile
+@@ -5,17 +5,28 @@ IMAGE := $(OUTPUT_DIR)/RTOSDemo.out
+ FREERTOS_ROOT = ./../../../..
+ 
+ CC = arm-none-eabi-gcc
++#CC = clang-19 --target=arm-linux-gnueabihf -march=armv7-a
++#CC = clang-19 --target=arm-linux-eabi -march=armv7-a
+ LD = arm-none-eabi-gcc
++#LD = clang-19 --target=arm-linux-gnueabi -march=armv7-a -mcpu=cortex-m3
++#LD = clang-19 --target=arm-none-eabi -march=armv7-a
++#LD = arm-none-eabi-ld
+ SIZE = arm-none-eabi-size
+ MAKE = make
+ 
+ ifeq ($(PICOLIBC), 1)
+     CFLAGS += --specs=picolibc.specs -DPICOLIBC_INTEGER_PRINTF_SCANF
+ endif
+-CFLAGS += -mthumb -mcpu=cortex-m3 -ffreestanding
++CFLAGS += -mthumb -mcpu=cortex-m3
+ CFLAGS += -g3 -Os -ffunction-sections -fdata-sections
+-#CFLAGS += -flto
++CFLAGS += -flto
+ CFLAGS += -Wall -Wextra -Wshadow -Wno-unused-value
++CFLAGS += -Wwrite-strings -Wold-style-definition -Wredundant-decls
++#CFLAGS += -Wc++-compat
++#CFLAGS += -std=c99
++#CFLAGS += -Wpedantic -fanalyzer
++#CFLAGS += -Wconversion
++#CFLAGS += -Wmissing-prototypes
+ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT $@
+ CFLAGS += $(INCLUDE_DIRS)
+ 
+@@ -125,7 +136,6 @@ SOURCE_FILES +=	(TRACERECORDER_DIR)/trcMultiCoreEventBuffer.c
+ SOURCE_FILES +=	(TRACERECORDER_DIR)/trcObject.c
+ SOURCE_FILES +=	(TRACERECORDER_DIR)/trcPrint.c
+ SOURCE_FILES +=	(TRACERECORDER_DIR)/trcRunnable.c
+-SOURCE_FILES +=	(TRACERECORDER_DIR)/trcSnapshotRecorder.c
+ SOURCE_FILES +=	(TRACERECORDER_DIR)/trcStackMonitor.c
+ SOURCE_FILES +=	(TRACERECORDER_DIR)/trcStateMachine.c
+ SOURCE_FILES +=	(TRACERECORDER_DIR)/trcStaticBuffer.c
+diff --git a/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/main.c b/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/main.c
+index ae15d2f0a..b44ffc532 100644
+--- a/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/main.c
++++ b/FreeRTOS/Demo/CORTEX_MPS2_QEMU_IAR_GCC/main.c
+@@ -71,7 +71,7 @@
+  * If mainCREATE_SIMPLE_BLINKY_DEMO_ONLY is not 1 then the comprehensive test and
+  * demo application will be built.  The comprehensive test and demo application is
+  * implemented and described in main_full.c. */
+-#define mainCREATE_SIMPLE_BLINKY_DEMO_ONLY    1
++#define mainCREATE_SIMPLE_BLINKY_DEMO_ONLY    0
+ 
+ /* printf() output uses the UART.  These constants define the addresses of the
+  * required UART registers. */
+diff --git a/FreeRTOS/Demo/CORTEX_MPU_M3_MPS2_QEMU_GCC/Makefile b/FreeRTOS/Demo/CORTEX_MPU_M3_MPS2_QEMU_GCC/Makefile
+index 2322a1c48..72657ac2f 100644
+--- a/FreeRTOS/Demo/CORTEX_MPU_M3_MPS2_QEMU_GCC/Makefile
++++ b/FreeRTOS/Demo/CORTEX_MPU_M3_MPS2_QEMU_GCC/Makefile
+@@ -44,10 +44,14 @@ CFLAGS                +=    -mthumb -mcpu=cortex-m3
+ ifeq ($(DEBUG), 1)
+     CFLAGS            +=     -g3 -Og -ffunction-sections -fdata-sections -save-temps=obj
+ else
+-    CFLAGS            +=     -Os -ffunction-sections -fdata-sections
++    CFLAGS            +=     -g3 -Os -ffunction-sections -fdata-sections
+ endif
+-#CFLAGS                +=    -flto
++CFLAGS                +=    -flto
+ CFLAGS                +=    -Wall -Wextra -Wshadow -Wno-unused-parameter
++CFLAGS                +=    -Wconversion -Wwrite-strings -Wold-style-definition -Wstrict-prototypes
++#CFLAGS                +=    -Wc++-compat
++#CFLAGS                +=    -Wpedantic -fanalyzer
++#CFLAGS                +=    -Wmissing-prototypes -Wredundant-decls
+ CFLAGS                +=    $(INCLUDE_DIRS)
+ 
+ LDFLAGS                =    -T ./scripts/mps2_m3.ld
+diff --git a/FreeRTOS/Demo/Common/Minimal/StreamBufferDemo.c b/FreeRTOS/Demo/Common/Minimal/StreamBufferDemo.c
+index e940f2b60..1dbf84b68 100644
+--- a/FreeRTOS/Demo/Common/Minimal/StreamBufferDemo.c
++++ b/FreeRTOS/Demo/Common/Minimal/StreamBufferDemo.c
+@@ -174,6 +174,7 @@ static const char * pcDataSentFromInterrupt = "0123456789";
+ static const char * pc55ByteString = "One two three four five six seven eight nine ten eleven";
+ static const char * pc54ByteString = "01234567891abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ";
+ 
++uint32_t xErrorInfo2 = 0UL;
+ /* Used to log the status of the tests contained within this file for reporting
+  * to a monitoring task ('check' task). */
+ static BaseType_t xErrorStatus = pdPASS;
+@@ -221,6 +222,7 @@ static void prvCheckExpectedState( BaseType_t xState )
+ 
+     if( xState == pdFAIL )
+     {
++	xErrorInfo2 = 1UL;
+         xErrorStatus = pdFAIL;
+     }
+ }
+@@ -1198,6 +1200,7 @@ BaseType_t xAreStreamBufferTasksStillRunning( void )
+     {
+         if( ulLastEchoLoopCounters[ x ] == ulEchoLoopCounters[ x ] )
+         {
++	    xErrorInfo2 = 2UL;
+             xErrorStatus = pdFAIL;
+         }
+         else
+@@ -1208,6 +1211,7 @@ BaseType_t xAreStreamBufferTasksStillRunning( void )
+ 
+     if( ulNonBlockingRxCounter == ulLastNonBlockingRxCounter )
+     {
++	xErrorInfo2 = 3UL;
+         xErrorStatus = pdFAIL;
+     }
+     else
+@@ -1217,6 +1221,7 @@ BaseType_t xAreStreamBufferTasksStillRunning( void )
+ 
+     if( ulLastInterruptTriggerCounter == ulInterruptTriggerCounter )
+     {
++	xErrorInfo2 = 4UL;
+         xErrorStatus = pdFAIL;
+     }
+     else
+@@ -1232,6 +1237,7 @@ BaseType_t xAreStreamBufferTasksStillRunning( void )
+         {
+             if( ulLastSenderLoopCounters[ x ] == ulSenderLoopCounters[ x ] )
+             {
++		xErrorInfo2 = 5UL;
+                 xErrorStatus = pdFAIL;
+             }
+             else
+diff --git a/FreeRTOS/Demo/Common/Minimal/TaskNotify.c b/FreeRTOS/Demo/Common/Minimal/TaskNotify.c
+index 67a3d8b1a..be69d2e28 100644
+--- a/FreeRTOS/Demo/Common/Minimal/TaskNotify.c
++++ b/FreeRTOS/Demo/Common/Minimal/TaskNotify.c
+@@ -88,6 +88,7 @@ static void prvSuspendedTaskTimerTestCallback( TimerHandle_t xExpiredTimer );
+ /*-----------------------------------------------------------*/
+ 
+ /* Used to latch errors during the test's execution. */
++uint32_t xErrorInfo = 0UL;
+ static BaseType_t xErrorStatus = pdPASS;
+ 
+ /* Used to ensure the task has not stalled. */
+@@ -145,6 +146,7 @@ static void prvSingleTaskTests( void )
+     /* Should have blocked for the entire block time. */
+     if( ( xTaskGetTickCount() - xTimeOnEntering ) < xTicksToWait )
+     {
++	xErrorInfo = 1UL;
+         xErrorStatus = pdFAIL;
+     }
+ 
+@@ -176,6 +178,7 @@ static void prvSingleTaskTests( void )
+ 
+     if( ( xTaskGetTickCount() - xTimeOnEntering ) >= xTicksToWait )
+     {
++	xErrorInfo = 2UL;
+         xErrorStatus = pdFAIL;
+     }
+ 
+@@ -689,6 +692,7 @@ BaseType_t xAreTaskNotificationTasksStillRunning( void )
+      * actually running. */
+     if( ulLastNotifyCycleCount == ulNotifyCycleCount )
+     {
++	xErrorInfo = 3UL;
+         xErrorStatus = pdFAIL;
+     }
+     else
+@@ -702,6 +706,7 @@ BaseType_t xAreTaskNotificationTasksStillRunning( void )
+     {
+         if( ( ulTimerNotificationsSent - ulTimerNotificationsReceived ) > ulMaxSendReceiveDeviation )
+         {
++	    xErrorInfo = 4UL;
+             xErrorStatus = pdFAIL;
+         }
+     }
+diff --git a/FreeRTOS/Demo/Common/include/StreamBufferDemo.h b/FreeRTOS/Demo/Common/include/StreamBufferDemo.h
+index ace38ac2c..d94bce577 100644
+--- a/FreeRTOS/Demo/Common/include/StreamBufferDemo.h
++++ b/FreeRTOS/Demo/Common/include/StreamBufferDemo.h
+@@ -27,6 +27,8 @@
+ #ifndef STREAM_BUFFER_TEST_H
+ #define STREAM_BUFFER_TEST_H
+ 
++extern uint32_t xErrorInfo2;
++
+ void vStartStreamBufferTasks( void );
+ BaseType_t xAreStreamBufferTasksStillRunning( void );
+ void vPeriodicStreamBufferProcessing( void );
+diff --git a/FreeRTOS/Demo/Common/include/TaskNotify.h b/FreeRTOS/Demo/Common/include/TaskNotify.h
+index 4e53148f4..c11dcbfcd 100644
+--- a/FreeRTOS/Demo/Common/include/TaskNotify.h
++++ b/FreeRTOS/Demo/Common/include/TaskNotify.h
+@@ -27,6 +27,8 @@
+ #ifndef TASK_NOTIFY_H
+ #define TASK_NOTIFY_H
+ 
++extern uint32_t xErrorInfo;
++
+ void vStartTaskNotifyTask( void );
+ BaseType_t xAreTaskNotificationTasksStillRunning( void );
+ void xNotifyTaskFromISR( void );
+diff --git a/FreeRTOS/Demo/Posix_GCC/CMakeLists.txt b/FreeRTOS/Demo/Posix_GCC/CMakeLists.txt
+index 2dc147d17..1513f406f 100644
+--- a/FreeRTOS/Demo/Posix_GCC/CMakeLists.txt
++++ b/FreeRTOS/Demo/Posix_GCC/CMakeLists.txt
+@@ -4,8 +4,29 @@ project( posix_demo )
+ 
+ add_compile_options( -D_WINDOWS_ )
+ 
++#add_compile_options( -std=gnu90 )
++
+ add_compile_options( -Wall -Wextra -Wpedantic )
+ 
++add_compile_options( -Wwrite-strings )
++
++#add_compile_options( -Wc++-compat )
++
++#add_compile_options( -Weverything -Wno-padded -Wno-missing-noreturn )
++#add_compile_options( -Wno-unsafe-buffer-usage )
++
++#add_compile_options( -Wparentheses -Wsequence-point -Wpointer-arith -Wunreachable-code -Wuninitialized -Wlogical-not-parentheses -Wlogical-op )
++
++#add_compile_options( -Wshadow )
++
++#add_compile_options( -Wconversion )
++
++#add_compile_options( -Wold-style-definition -Wredundant-decls -Wmissing-prototypes )
++
++#add_compile_options( -fanalyzer )
++
++#add_compile_options( -flto )
++
+ if( TRACE_ON_ENTER )
+     add_compile_options( -DTRACE_ON_ENTER=1 )
+ else()
+@@ -35,8 +56,8 @@ else()
+     set( CMAKE_BUILD_TYPE "debug" )
+ endif()
+ 
+-set(CMAKE_C_FLAGS_RELEASE "-O3")
+-set(CMAKE_C_FLAGS_DEBUG "-O0 -g3")
++set(CMAKE_C_FLAGS_RELEASE "-g3 -O3 -DNDEBUG")
++set(CMAKE_C_FLAGS_DEBUG "-O3 -g3")
+ 
+ if( SANITIZE_ADDRESS )
+     add_compile_options( -fsanitize=address -fsanitize=alignment )
+diff --git a/FreeRTOS/Demo/Posix_GCC/main.c b/FreeRTOS/Demo/Posix_GCC/main.c
+index a3d316cce..c3b0e205c 100644
+--- a/FreeRTOS/Demo/Posix_GCC/main.c
++++ b/FreeRTOS/Demo/Posix_GCC/main.c
+@@ -86,6 +86,7 @@
+ #ifdef USER_DEMO
+     #define     mainSELECTED_APPLICATION    USER_DEMO
+ #else /* Default Setting */
++    /* #define    mainSELECTED_APPLICATION     BLINKY_DEMO */
+     #define    mainSELECTED_APPLICATION     FULL_DEMO
+ #endif
+ 
+diff --git a/FreeRTOS/Demo/Posix_GCC/main_full.c b/FreeRTOS/Demo/Posix_GCC/main_full.c
+index dcd9d63be..2ccabfdba 100644
+--- a/FreeRTOS/Demo/Posix_GCC/main_full.c
++++ b/FreeRTOS/Demo/Posix_GCC/main_full.c
+@@ -184,7 +184,7 @@ static void prvReloadModeTestTimerCallback( TimerHandle_t xTimer );
+ 
+ /* The variable into which error messages are latched. */
+ static const char * pcStatusMessage = "OK: No errors";
+-int xErrorCount = 0;
++static int xErrorCount = 0;
+ 
+ /* This semaphore is created purely to test using the vSemaphoreDelete() and
+  * semaphore tracing API functions.  It has no other purpose. */
+@@ -294,6 +294,7 @@ static void prvCheckTask( void * pvParameters )
+ 
+         if( xAreStreamBufferTasksStillRunning() != pdTRUE )
+         {
++            printf( "xErrorInfo2: %u\r\n", xErrorInfo2);
+             pcStatusMessage = "Error:  StreamBuffer";
+             xErrorCount++;
+         }
+@@ -304,6 +305,7 @@ static void prvCheckTask( void * pvParameters )
+         }
+         else if( xAreTaskNotificationTasksStillRunning() != pdTRUE )
+         {
++            printf( "xErrorInfo: %u\r\n", xErrorInfo);
+             pcStatusMessage = "Error:  Notification";
+             xErrorCount++;
+         }
